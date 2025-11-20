@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             // Aquí procesamos la respuesta
             if (data.success) {
+                //Guardamos el token en localStorage.
+                localStorage.setItem('token', data.token);
                 // Login exitoso
                 alert('Login exitoso');
                 window.location.href= 'bienvenida.html'; // Redirige a la página de bienvenida
