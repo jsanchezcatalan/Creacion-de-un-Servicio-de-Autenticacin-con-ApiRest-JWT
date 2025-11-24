@@ -1,18 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('auth_token');
-    
+
+    // Si no hay token, o token inválido, redirige a "sin permisos"
     if (!token) {
-        window.location.href = 'login.html'; 
+        window.location.href = 'sin_permisos.html';
         return;
     }
 
     const PROJECT_FOLDER = 'Creacion-de-un-Servicio-de-Autenticacion-con-ApiRest-JWT';
-    const API_WELCOME_URL = 'http://localhost/' + PROJECT_FOLDER + '/Backend/api/welcome.php';
+    const API_WELCOME_URL = `http://localhost/${PROJECT_FOLDER}/Backend/api/welcome.php`;
 
     fetch(API_WELCOME_URL, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}` 
+            'Authorization': `Bearer ${token}`
         }
     })
     .then(response => {
@@ -27,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
     })
     .then(data => {
-        const usuario = data.datos_usuario; 
-        
+        const usuario = data.datos_usuario;
+
         document.getElementById('welcomeMessage').textContent =
             `¡Bienvenido, ${usuario.username} (Rol: ${usuario.rol})!`;
 
@@ -37,12 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
         console.error('Error:', error);
-        if (!error.message.includes('Acceso denegado')) {
-            localStorage.removeItem('auth_token');
-            window.location.href = 'login.html'; 
-        }
+        // En caso de error inesperado, también manda a sin permisos
+        window.location.href = 'sin_permisos.html';
     });
 
+    // Funcionalidad Cerrar sesión
     document.getElementById('logoutButton').addEventListener('click', () => {
         localStorage.removeItem('auth_token'); 
         window.location.href = 'login.html'; 
