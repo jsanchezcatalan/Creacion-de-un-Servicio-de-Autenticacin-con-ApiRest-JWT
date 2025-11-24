@@ -1,0 +1,74 @@
+/* Importamos la fuente Roboto desde Google Fonts para un aspecto moderno */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+    --primary-color: #007bff; /* Azul de Bootstrap */
+    --secondary-color: #6c757d;
+    --background-color: #f8f9fa; /* Gris claro */
+    --card-bg-color: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Estilo para la tarjeta principal (Login/Bienvenida/Error) */
+.custom-card {
+    background-color: var(--card-bg-color);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+/* Estilos de formulario (usando clases de Bootstrap en el HTML) */
+.form-control {
+    border-radius: 5px;
+}
+
+/* Botones */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Mensajes de error y éxito */
+#error-message, .text-danger {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+/* Estilo específico para la pantalla de bienvenida */
+#welcomeMessage {
+    font-size: 1.5rem;
+    color: #28a745; /* Verde de éxito */
+    margin-bottom: 10px;
+}
+
+/* Estilo para el botón de cerrar sesión */
+#logoutButton {
+    margin-top: 20px;
+}

@@ -1,50 +1,56 @@
-// Esperamos a que el DOM cargue completamente con el evento DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('error-message');
 
-    // Seleccionamos el formulario de login por su ID
-    const formulario = document.getElementById('loginForm');
-    
-    // Escuchamos cuando se envía el formulario, cuando el ususario hace clic en el botón de enviar.
-    formulario.addEventListener('submit', function(event) {
-        
-        // Prevenimos que el formulario se envíe de forma tradicional
+    // Comprobar si ya existe un token. Si existe, redirigir a bienvenida.html
+    if (localStorage.getItem('auth_token')) {
+        window.location.href = 'bienvenida.html';
+        return;
+    }
+
+    loginForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        // Obtenemos los valores de los inputs con el .value que extrae el texto.
-        const usuario = document.querySelector('input[name="usuario"]').value;
-        const password = document.querySelector('input[name="password"]').value;
-        
-        // Creamos un objeto con los datos del formulario
-        const datos = {
-            usuario: usuario,
-            password: password
-        };
-        // Enviamos los datos al servidor usando fetch
-        // Hacemos la petición al backend
-        fetch('Backend/api/login.php', {
+        errorMessage.textContent = '';
+
+        // Obtener credenciales del formulario
+        const username = this.username.value;
+        const password = this.password.value;
+
+        // Requisito: utiliza JavaScript y fetch para enviar las credenciales [cite: 53]
+        fetch('../../Backend/api/login.php', { // RUTA AJUSTADA a tu estructura
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'// Indicamos que enviamos JSON
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(datos)// Convertimos el objeto a JSON
+            body: JSON.stringify({ username: username, password: password }),
         })
-        .then(response=> response.json()) //Espera la respuesta del servidor y convierte el json que envio el backend a un objeto de JavaScript para usarlo.
+        .then(response => {
+            // Requisito: Si el servidor responde con 401, redirige o maneja el error [cite: 94]
+            if (response.status === 401) {
+                errorMessage.textContent = 'Usuario o contraseña incorrectos.';
+                throw new Error('401 Unauthorized');
+            }
+            if (!response.ok) {
+                // Manejar otros errores HTTP que no sean 401
+                errorMessage.textContent = 'Error en el servidor. Código: ' + response.status;
+                throw new Error('Server error: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
-            // Aquí procesamos la respuesta
-            if (data.success) {
-                //Guardamos el token en localStorage.
-                localStorage.setItem('token', data.token);
-                // Login exitoso
-                alert('Login exitoso');
-                window.location.href= 'bienvenida.html'; // Redirige a la página de bienvenida
+            if (data.success && data.token) {
+                // Requisito: Usa localStorage para almacenar el token [cite: 85]
+                localStorage.setItem('auth_token', data.token);
+                // Redirige a la pantalla de bienvenida [cite: 72]
+                window.location.href = 'bienvenida.html'; 
             } else {
-                // Login fallido
-                alert('Error: ' + data.mensaje);
+                // Error si la respuesta es 200 pero el servidor indica un fallo lógico
+                errorMessage.textContent = data.mensaje || 'Error de autenticación.';
             }
         })
         .catch(error => {
-            //Manejo el error en caso que falle por el servidor o la red.
-            console.error('Error:', error);
-            alert('Ocurrió un error al procesar la solicitud.');
-        })
-    });  
+            console.error('Error durante el login:', error);
+            // El mensaje de error ya se estableció para el 401
+        });
+    });
 });
