@@ -1,56 +1,56 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('error-message');
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('error-message');
 
-    // Comprobar si ya existe un token. Si existe, redirigir a bienvenida.html
-    if (localStorage.getItem('auth_token')) {
-        window.location.href = 'bienvenida.html';
-        return;
-    }
+    if (localStorage.getItem('auth_token')) { 
+        // ⭐ CORRECCIÓN 1: Ruta simple
+        window.location.href = 'bienvenida.html'; 
+        return;
+    }
 
-    loginForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        errorMessage.textContent = '';
+    // ⭐⭐ RUTA API: Nombre exacto de tu carpeta en htdocs. ⭐⭐
+    const PROJECT_FOLDER = 'Creacion-de-un-Servicio-de-Autenticacion-con-ApiRest-JWT';
 
-        // Obtener credenciales del formulario
-        const username = this.username.value;
-        const password = this.password.value;
+    // Usamos 'http://localhost/' porque el Frontend está en el puerto 5500.
+    const API_LOGIN_URL = 'http://localhost/' + PROJECT_FOLDER + '/Backend/api/login.php';
 
-        // Requisito: utiliza JavaScript y fetch para enviar las credenciales [cite: 53]
-        fetch('../../Backend/api/login.php', { // RUTA AJUSTADA a tu estructura
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: username, password: password }),
-        })
-        .then(response => {
-            // Requisito: Si el servidor responde con 401, redirige o maneja el error [cite: 94]
-            if (response.status === 401) {
-                errorMessage.textContent = 'Usuario o contraseña incorrectos.';
-                throw new Error('401 Unauthorized');
-            }
-            if (!response.ok) {
-                // Manejar otros errores HTTP que no sean 401
-                errorMessage.textContent = 'Error en el servidor. Código: ' + response.status;
-                throw new Error('Server error: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success && data.token) {
-                // Requisito: Usa localStorage para almacenar el token [cite: 85]
-                localStorage.setItem('auth_token', data.token);
-                // Redirige a la pantalla de bienvenida [cite: 72]
-                window.location.href = 'bienvenida.html'; 
-            } else {
-                // Error si la respuesta es 200 pero el servidor indica un fallo lógico
-                errorMessage.textContent = data.mensaje || 'Error de autenticación.';
-            }
-        })
-        .catch(error => {
-            console.error('Error durante el login:', error);
-            // El mensaje de error ya se estableció para el 401
-        });
-    });
+    loginForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        errorMessage.textContent = '';
+
+        const username = this.username.value; 
+        const password = this.password.value; 
+
+        fetch(API_LOGIN_URL, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username, password: password }), 
+        })
+        .then(response => {
+            if (response.status === 401) {
+                errorMessage.textContent = 'Usuario o contraseña incorrectos.';
+            }
+            if (!response.ok) {
+                throw new Error('Error en el servidor. Código: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.token) { 
+                localStorage.setItem('auth_token', data.token);
+                // ⭐ CORRECCIÓN 2: Ruta simple
+                window.location.href = 'bienvenida.html'; 
+            } else if (data.mensaje) {
+                errorMessage.textContent = data.mensaje;
+            }
+        })
+        .catch(error => {
+            console.error('Error durante el login:', error);
+            if (!errorMessage.textContent) { // Evita sobreescribir el 401
+                errorMessage.textContent = 'No se pudo conectar con la API. Revise su ruta o XAMPP.';
+            }
+        });
+    });
 });
